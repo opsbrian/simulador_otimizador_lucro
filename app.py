@@ -1,4 +1,5 @@
 import io
+import base64
 import dash
 from dash import dcc, html, Input, Output, State, dash_table, callback_context
 import dash_bootstrap_components as dbc
@@ -95,12 +96,10 @@ class ClarioOptimizationEngine:
 # ==============================================================================
 
 def generate_clario_pdf(engine: ClarioOptimizationEngine) -> bytes:
-    """Gera um PDF corporativo no padrão Clariô Corporate Intelligence."""
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=36, leftMargin=36, topMargin=36, bottomMargin=36)
     story = []
 
-    # Estilos
     styles = getSampleStyleSheet()
 
     title_style = ParagraphStyle(
@@ -175,7 +174,7 @@ def generate_clario_pdf(engine: ClarioOptimizationEngine) -> bytes:
     story.append(kpi_table)
     story.append(Spacer(1, 15))
 
-    # 3. Memorial de Cálculo Aritmético
+    # 3. Memorial de Cálculo
     story.append(Paragraph("1. Memorial de Cálculo da Demanda", section_heading))
     memorial_text = (
         f"A partir dos testes de indução com Preço Atual de <b>R$ {engine.p_curr:,.2f}</b> (Volume: {engine.q_curr:.0f} un.) "
@@ -187,7 +186,7 @@ def generate_clario_pdf(engine: ClarioOptimizationEngine) -> bytes:
     story.append(Paragraph(memorial_text, body_style))
     story.append(Spacer(1, 10))
 
-    # 4. Matriz Comparativa de Estratégias
+    # 4. Matriz Comparativa
     story.append(Paragraph("2. Matriz Comparativa de Estratégias", section_heading))
     bench_data = engine.generate_benchmark_data()
     table_content = [["Estratégia", "Preço (R$)", "Vol./Dia", "Faturamento", "Custos Totais", "Lucro Líquido"]]
@@ -211,12 +210,12 @@ def generate_clario_pdf(engine: ClarioOptimizationEngine) -> bytes:
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('PADDING', (0, 0), (-1, -1), 6),
         ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E2E8F0')),
-        ('BACKGROUND', (0, 3), (-1, 3), colors.HexColor('#DCFCE7')),  # Destaque Lucro Máximo Clariô
+        ('BACKGROUND', (0, 3), (-1, 3), colors.HexColor('#DCFCE7')),
     ]))
     story.append(matrix_table)
     story.append(Spacer(1, 15))
 
-    # 5. Governança em 3 Níveis
+    # 5. Governança
     story.append(Paragraph("3. Desdobramento de Metas & Governança Executiva", section_heading))
     gov_text = (
         f"<b>Nível 1 (Macro/C-Level):</b> Foco na Margem Líquida Geral. O objetivo de faturamento estabiliza-se no topo da curva quadrática de eficiência (R$ {fin_opt['lucro_liquido']:,.2f}/dia).<br/>"
@@ -240,7 +239,8 @@ app = dash.Dash(
         dbc.themes.BOOTSTRAP,
         "https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap"
     ],
-    title="Clariô Corporate Intelligence | Optimization Engine"
+    title="Clariô Corporate Intelligence | Optimization Engine",
+    suppress_callback_exceptions=True
 )
 
 server = app.server
@@ -255,7 +255,7 @@ def make_apple_kpi(title, value_id, sub_id, accent_color="#007AFF"):
             html.Div(style={"width": "8px", "height": "8px", "borderRadius": "50%", "backgroundColor": accent_color})
         ], className="d-flex justify-content-between align-items-center mb-2"),
         html.H3("R$ --", id=value_id,
-                style={"fontSize": "26px", "fontWeight": "700", "color": "#1C1C1E", "letterSpacing": "-0.5px"},
+                style={"fontSize": "24px", "fontWeight": "700", "color": "#1C1C1E", "letterSpacing": "-0.5px"},
                 className="mb-1"),
         html.Span("--", id=sub_id, style={"fontSize": "12px", "color": "#6E6E73", "fontWeight": "400"})
     ], style={
@@ -274,7 +274,7 @@ def make_apple_input(label_text, input_id, default_val, step_val="any"):
         html.Label(label_text,
                    style={"fontSize": "12px", "fontWeight": "500", "color": "#3A3A3C", "marginBottom": "6px"}),
         dbc.Input(
-            id=input_id, type="number", value=default_val, step=step_val,  # "any" permite aceitar qualquer casa decimal
+            id=input_id, type="number", value=default_val, step=step_val,
             style={
                 "backgroundColor": "#EFEFF4",
                 "border": "none",
@@ -311,104 +311,25 @@ app.layout = html.Div([
         "alignItems": "center"
     }),
 
-    # Conteúdo da Página
     dbc.Container([
-        # Header do Painel
         html.Div([
             html.H1("Otimizador de Lucro Líquido",
                     style={"fontSize": "32px", "fontWeight": "700", "color": "#1C1C1E", "letterSpacing": "-0.8px"},
                     className="mb-1"),
-            html.P("Simulação de elasticidade-preço, ponto ótimo e governança de margens.",
-                   style={"fontSize": "15px", "color": "#6E6E73"}, className="mb-4")
+            html.P("Análise de histórico de vendas, elasticidade-preço e governança de margens.",
+                   style={"fontSize": "15px", "color": "#6E6E73"}, className="mb-3")
         ], className="mt-4"),
 
-        dbc.Row([
-            # Painel Lateral de Entradas
-            dbc.Col([
-                html.Div([
-                    html.H6("Coordenadas da Fase de Indução",
-                            style={"fontSize": "13px", "fontWeight": "700", "color": "#1C1C1E"}, className="mb-3"),
-                    make_apple_input("Preço Atual (R$)", "input-p-curr", 150.0, "any"),
-                    make_apple_input("Volume Atual (un/dia)", "input-q-curr", 70, "any"),
-                    make_apple_input("Preço de Teste (R$)", "input-p-test", 180.0, "any"),
-                    make_apple_input("Volume no Teste (un/dia)", "input-q-test", 46, "any"),
+        # Navegação por Abas
+        dbc.Tabs([
+            dbc.Tab(label="📂 1. Ingestão & Análise de CSV", tab_id="tab-csv",
+                    label_style={"fontWeight": "600", "borderRadius": "10px"}),
+            dbc.Tab(label="🎯 2. Simulador & Otimização", tab_id="tab-simulator",
+                    label_style={"fontWeight": "600", "borderRadius": "10px"}),
+        ], id="main-tabs", active_tab="tab-csv", className="mb-4"),
 
-                    html.Hr(style={"borderColor": "#E5E5EA", "margin": "20px 0"}),
-
-                    html.H6("Estrutura Operacional",
-                            style={"fontSize": "13px", "fontWeight": "700", "color": "#1C1C1E"}, className="mb-3"),
-                    make_apple_input("Custos Fixos Diários - CF (R$)", "input-cf", 1500.0, "any"),
-                    make_apple_input("Custo Variável Unit. - CVU (R$)", "input-cvu", 40.0, "any"),
-                ], style={
-                    "backgroundColor": "rgba(255, 255, 255, 0.75)",
-                    "backdropFilter": "blur(30px)",
-                    "WebkitBackdropFilter": "blur(30px)",
-                    "borderRadius": "20px",
-                    "padding": "24px",
-                    "boxShadow": "0 10px 40px rgba(0,0,0,0.03)",
-                    "border": "1px solid rgba(255,255,255,0.8)"
-                }, className="mb-4")
-            ], xs=12, md=4, lg=3),
-
-            # Conteúdo de Resultados
-            dbc.Col([
-                # Grid de KPIs Topo
-                dbc.Row([
-                    dbc.Col(make_apple_kpi("Preço Ideal (Clariô)", "kpi-p-opt", "kpi-p-opt-sub", "#34C759"), md=4),
-                    dbc.Col(make_apple_kpi("Lucro Líquido Máximo", "kpi-profit-max", "kpi-profit-max-sub", "#007AFF"),
-                            md=4),
-                    dbc.Col(make_apple_kpi("Volume de Demanda Ideal", "kpi-vol-opt", "kpi-vol-opt-sub", "#FF9500"),
-                            md=4),
-                ], className="g-3 mb-4"),
-
-                # Painel de Storytelling Automático
-                html.Div([
-                    html.H6("💡 Diagnóstico Executivo de Precificação",
-                            style={"fontSize": "13px", "fontWeight": "700", "color": "#007AFF"}, className="mb-2"),
-                    dcc.Markdown(id="storytelling-text",
-                                 style={"fontSize": "14px", "lineHeight": "1.6", "color": "#1C1C1E"}, className="mb-0")
-                ], style={
-                    "backgroundColor": "rgba(255, 255, 255, 0.85)",
-                    "backdropFilter": "blur(20px)",
-                    "WebkitBackdropFilter": "blur(20px)",
-                    "borderRadius": "18px",
-                    "padding": "20px",
-                    "boxShadow": "0 8px 30px rgba(0, 0, 0, 0.03)",
-                    "borderLeft": "5px solid #007AFF",
-                    "marginBottom": "24px"
-                }),
-
-                # Gráfico
-                html.Div([
-                    dcc.Graph(id="chart-optimization", config={"displayModeBar": False})
-                ], style={
-                    "backgroundColor": "rgba(255, 255, 255, 0.85)",
-                    "backdropFilter": "blur(20px)",
-                    "WebkitBackdropFilter": "blur(20px)",
-                    "borderRadius": "20px",
-                    "padding": "20px",
-                    "boxShadow": "0 10px 30px rgba(0, 0, 0, 0.03)",
-                    "border": "1px solid rgba(255, 255, 255, 0.6)",
-                    "marginBottom": "24px"
-                }),
-
-                # Tabela Comparativa de Estratégias
-                html.Div([
-                    html.H6("Matriz Comparativa de Estratégias de Mercado",
-                            style={"fontSize": "15px", "fontWeight": "700", "color": "#1C1C1E",
-                                   "marginBottom": "16px"}),
-                    html.Div(id="table-container")
-                ], style={
-                    "backgroundColor": "rgba(255, 255, 255, 0.85)",
-                    "backdropFilter": "blur(20px)",
-                    "WebkitBackdropFilter": "blur(20px)",
-                    "borderRadius": "20px",
-                    "padding": "24px",
-                    "boxShadow": "0 10px 30px rgba(0, 0, 0, 0.03)",
-                    "border": "1px solid rgba(255, 255, 255, 0.6)"
-                })
-            ], xs=12, md=8, lg=9)
-        ])
+        # Conteúdo Dinâmico das Abas
+        html.Div(id="tab-content")
     ], fluid=True, style={"maxWidth": "1400px"})
 ], style={
     "backgroundColor": "#F5F5F7",
@@ -418,10 +339,296 @@ app.layout = html.Div([
 })
 
 
+# Layout da Aba 1: Ingestão de CSV
+def render_csv_tab():
+    return html.Div([
+        dbc.Row([
+            dbc.Col([
+                html.Div([
+                    html.H6("Carregar Histórico de Vendas", style={"fontSize": "14px", "fontWeight": "700"},
+                            className="mb-2"),
+                    html.P("O arquivo deve possuir as colunas: produto, preco, quantidade_venda, data",
+                           style={"fontSize": "12px", "color": "#8E8E93"}),
+
+                    dcc.Upload(
+                        id='upload-data',
+                        children=html.Div([
+                            'Arraste e solte o CSV aqui ou ',
+                            html.A('Selecione um Arquivo', style={"color": "#007AFF", "fontWeight": "600"})
+                        ]),
+                        style={
+                            'width': '100%',
+                            'height': '100px',
+                            'lineHeight': '100px',
+                            'borderWidth': '2px',
+                            'borderStyle': 'dashed',
+                            'borderColor': '#C7C7CC',
+                            'borderRadius': '16px',
+                            'textAlign': 'center',
+                            'backgroundColor': '#FFFFFF',
+                            'cursor': 'pointer'
+                        },
+                        multiple=False
+                    ),
+                    html.Div(id='upload-status-msg', className="mt-2", style={"fontSize": "13px", "fontWeight": "500"})
+                ], style={
+                    "backgroundColor": "rgba(255, 255, 255, 0.85)",
+                    "backdropFilter": "blur(20px)",
+                    "borderRadius": "20px",
+                    "padding": "24px",
+                    "boxShadow": "0 8px 30px rgba(0, 0, 0, 0.03)"
+                }, className="mb-4")
+            ], md=12)
+        ]),
+
+        html.Div(id="csv-analysis-container", children=[
+            dbc.Row([
+                dbc.Col([
+                    html.Div([
+                        html.Label("Selecione o Produto para Análise:",
+                                   style={"fontSize": "13px", "fontWeight": "600", "marginBottom": "8px"}),
+                        dcc.Dropdown(id="product-dropdown", placeholder="Selecione um produto...",
+                                     style={"borderRadius": "10px"})
+                    ], className="mb-4")
+                ], md=6)
+            ]),
+
+            dbc.Row([
+                dbc.Col(make_apple_kpi("Preço Mínimo Encontrado", "csv-kpi-pmin", "csv-sub-pmin", "#007AFF"), md=3),
+                dbc.Col(make_apple_kpi("Média de Vendas (P. Mín)", "csv-kpi-qmin", "csv-sub-qmin", "#007AFF"), md=3),
+                dbc.Col(make_apple_kpi("Preço Máximo Encontrado", "csv-kpi-pmax", "csv-sub-pmax", "#FF9500"), md=3),
+                dbc.Col(make_apple_kpi("Média de Vendas (P. Máx)", "csv-kpi-qmax", "csv-sub-qmax", "#FF9500"), md=3),
+            ], className="g-3 mb-4"),
+
+            dbc.Row([
+                dbc.Col([
+                    dbc.Button("⚡ Enviar Parâmetros para o Otimizador", id="btn-transfer-params", color="success",
+                               className="w-100 py-3",
+                               style={"borderRadius": "14px", "fontWeight": "700", "fontSize": "16px"})
+                ], md=12)
+            ])
+        ], style={"display": "none"})  # Oculto até carregar o CSV
+    ])
+
+
+# Layout da Aba 2: Simulador
+def render_simulator_tab(p_curr=150.0, q_curr=70.0, p_test=180.0, q_test=46.0):
+    return dbc.Row([
+        # Painel Lateral de Entradas
+        dbc.Col([
+            html.Div([
+                html.H6("Coordenadas da Fase de Indução",
+                        style={"fontSize": "13px", "fontWeight": "700", "color": "#1C1C1E"}, className="mb-3"),
+                make_apple_input("Preço Atual / Mínimo (R$)", "input-p-curr", p_curr, "any"),
+                make_apple_input("Volume Média P. Mínimo (un/dia)", "input-q-curr", q_curr, "any"),
+                make_apple_input("Preço de Teste / Máximo (R$)", "input-p-test", p_test, "any"),
+                make_apple_input("Volume Média P. Máximo (un/dia)", "input-q-test", q_test, "any"),
+
+                html.Hr(style={"borderColor": "#E5E5EA", "margin": "20px 0"}),
+
+                html.H6("Estrutura Operacional", style={"fontSize": "13px", "fontWeight": "700", "color": "#1C1C1E"},
+                        className="mb-3"),
+                make_apple_input("Custos Fixos Diários - CF (R$)", "input-cf", 1500.0, "any"),
+                make_apple_input("Custo Variável Unit. - CVU (R$)", "input-cvu", 40.0, "any"),
+            ], style={
+                "backgroundColor": "rgba(255, 255, 255, 0.75)",
+                "backdropFilter": "blur(30px)",
+                "WebkitBackdropFilter": "blur(30px)",
+                "borderRadius": "20px",
+                "padding": "24px",
+                "boxShadow": "0 10px 40px rgba(0,0,0,0.03)",
+                "border": "1px solid rgba(255,255,255,0.8)"
+            }, className="mb-4")
+        ], xs=12, md=4, lg=3),
+
+        # Conteúdo de Resultados
+        dbc.Col([
+            # Grid de KPIs Topo
+            dbc.Row([
+                dbc.Col(make_apple_kpi("Preço Ideal (Clariô)", "kpi-p-opt", "kpi-p-opt-sub", "#34C759"), md=4),
+                dbc.Col(make_apple_kpi("Lucro Líquido Máximo", "kpi-profit-max", "kpi-profit-max-sub", "#007AFF"),
+                        md=4),
+                dbc.Col(make_apple_kpi("Volume de Demanda Ideal", "kpi-vol-opt", "kpi-vol-opt-sub", "#FF9500"), md=4),
+            ], className="g-3 mb-4"),
+
+            # Painel de Storytelling
+            html.Div([
+                html.H6("💡 Diagnóstico Executivo de Precificação",
+                        style={"fontSize": "13px", "fontWeight": "700", "color": "#007AFF"}, className="mb-2"),
+                dcc.Markdown(id="storytelling-text",
+                             style={"fontSize": "14px", "lineHeight": "1.6", "color": "#1C1C1E"}, className="mb-0")
+            ], style={
+                "backgroundColor": "rgba(255, 255, 255, 0.85)",
+                "backdropFilter": "blur(20px)",
+                "borderRadius": "18px",
+                "padding": "20px",
+                "boxShadow": "0 8px 30px rgba(0, 0, 0, 0.03)",
+                "borderLeft": "5px solid #007AFF",
+                "marginBottom": "24px"
+            }),
+
+            # Gráfico
+            html.Div([
+                dcc.Graph(id="chart-optimization", config={"displayModeBar": False})
+            ], style={
+                "backgroundColor": "rgba(255, 255, 255, 0.85)",
+                "backdropFilter": "blur(20px)",
+                "borderRadius": "20px",
+                "padding": "20px",
+                "boxShadow": "0 10px 30px rgba(0, 0, 0, 0.03)",
+                "border": "1px solid rgba(255, 255, 255, 0.6)",
+                "marginBottom": "24px"
+            }),
+
+            # Tabela Comparativa
+            html.Div([
+                html.H6("Matriz Comparativa de Estratégias de Mercado",
+                        style={"fontSize": "15px", "fontWeight": "700", "color": "#1C1C1E", "marginBottom": "16px"}),
+                html.Div(id="table-container")
+            ], style={
+                "backgroundColor": "rgba(255, 255, 255, 0.85)",
+                "backdropFilter": "blur(20px)",
+                "borderRadius": "20px",
+                "padding": "24px",
+                "boxShadow": "0 10px 30px rgba(0, 0, 0, 0.03)",
+                "border": "1px solid rgba(255, 255, 255, 0.6)"
+            })
+        ], xs=12, md=8, lg=9)
+    ])
+
+
 # ==============================================================================
 # 4. CALLBACKS & REATIVIDADE
 # ==============================================================================
 
+# Callback para chavear as abas
+@app.callback(
+    Output("tab-content", "children"),
+    Input("main-tabs", "active_tab"),
+    State("input-p-curr", "value"),
+    State("input-q-curr", "value"),
+    State("input-p-test", "value"),
+    State("input-q-test", "value")
+)
+def render_tab_content(active_tab, p_curr, q_curr, p_test, q_test):
+    if active_tab == "tab-csv":
+        return render_csv_tab()
+    elif active_tab == "tab-simulator":
+        p_c = p_curr if p_curr is not None else 150.0
+        q_c = q_curr if q_curr is not None else 70.0
+        p_t = p_test if p_test is not None else 180.0
+        q_t = q_test if q_test is not None else 46.0
+        return render_simulator_tab(p_c, q_c, p_t, q_t)
+    return html.Div()
+
+
+# Callback de Processamento do CSV
+@app.callback(
+    [
+        Output("upload-status-msg", "children"),
+        Output("upload-status-msg", "style"),
+        Output("csv-analysis-container", "style"),
+        Output("product-dropdown", "options"),
+        Output("product-dropdown", "value")
+    ],
+    Input("upload-data", "contents"),
+    State("upload-data", "filename")
+)
+def parse_csv_upload(contents, filename):
+    if contents is None:
+        return "", {}, {"display": "none"}, [], None
+
+    content_type, content_string = contents.split(',')
+    decoded = base64.b64decode(content_string)
+
+    try:
+        df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+        required_cols = {'produto', 'preco', 'quantidade_venda', 'data'}
+
+        if not required_cols.issubset(set(df.columns)):
+            msg = f"❌ Erro: O arquivo precisa conter as colunas: {', '.join(required_cols)}"
+            return msg, {"color": "#FF3B30"}, {"display": "none"}, [], None
+
+        products = sorted(df['produto'].unique().tolist())
+        first_prod = products[0] if products else None
+
+        msg = f"✅ Arquivo '{filename}' carregado com sucesso! ({len(df)} registros)"
+        return msg, {"color": "#34C759"}, {"display": "block"}, [{"label": p, "value": p} for p in products], first_prod
+
+    except Exception as e:
+        return f"❌ Erro ao ler CSV: {str(e)}", {"color": "#FF3B30"}, {"display": "none"}, [], None
+
+
+# Callback de cálculo do Produto Selecionado no CSV
+@app.callback(
+    [
+        Output("csv-kpi-pmin", "children"), Output("csv-sub-pmin", "children"),
+        Output("csv-kpi-qmin", "children"), Output("csv-sub-qmin", "children"),
+        Output("csv-kpi-pmax", "children"), Output("csv-sub-pmax", "children"),
+        Output("csv-kpi-qmax", "children"), Output("csv-sub-qmax", "children")
+    ],
+    [Input("product-dropdown", "value"), Input("upload-data", "contents")]
+)
+def update_csv_kpis(selected_product, contents):
+    if not selected_product or contents is None:
+        return ["R$ --"] * 8
+
+    content_type, content_string = contents.split(',')
+    decoded = base64.b64decode(content_string)
+    df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+
+    df_prod = df[df['produto'] == selected_product].copy()
+
+    p_min = df_prod['preco'].min()
+    p_max = df_prod['preco'].max()
+
+    q_avg_p_min = df_prod[df_prod['preco'] == p_min]['quantidade_venda'].mean()
+    q_avg_p_max = df_prod[df_prod['preco'] == p_max]['quantidade_venda'].mean()
+
+    return (
+        f"R$ {p_min:,.2f}", "Parâmetro Inicial (P_curr)",
+        f"{q_avg_p_min:,.1f} un.", "Média de Vendas Diárias",
+        f"R$ {p_max:,.2f}", "Parâmetro de Teste (P_test)",
+        f"{q_avg_p_max:,.1f} un.", "Média de Vendas Diárias"
+    )
+
+
+# Callback para enviar parâmetros do CSV para o Simulador
+@app.callback(
+    [
+        Output("main-tabs", "active_tab"),
+        Output("input-p-curr", "value"),
+        Output("input-q-curr", "value"),
+        Output("input-p-test", "value"),
+        Output("input-q-test", "value")
+    ],
+    Input("btn-transfer-params", "n_clicks"),
+    [
+        State("product-dropdown", "value"),
+        State("upload-data", "contents")
+    ],
+    prevent_initial_call=True
+)
+def transfer_csv_params_to_simulator(n_clicks, selected_product, contents):
+    if not n_clicks or contents is None or not selected_product:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update
+
+    content_type, content_string = contents.split(',')
+    decoded = base64.b64decode(content_string)
+    df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
+
+    df_prod = df[df['produto'] == selected_product].copy()
+
+    p_min = float(df_prod['preco'].min())
+    p_max = float(df_prod['preco'].max())
+
+    q_avg_p_min = float(df_prod[df_prod['preco'] == p_min]['quantidade_venda'].mean())
+    q_avg_p_max = float(df_prod[df_prod['preco'] == p_max]['quantidade_venda'].mean())
+
+    return "tab-simulator", round(p_min, 2), round(q_avg_p_min, 1), round(p_max, 2), round(q_avg_p_max, 1)
+
+
+# Callback principal de Atualização do Dashboard
 @app.callback(
     [
         Output("kpi-p-opt", "children"),
@@ -520,11 +727,10 @@ def update_dashboard(p_curr, q_curr, p_test, q_test, cf, cvu):
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
     )
 
-    # Tabela de Resultados
+    # Tabela
     bench_data = engine.generate_benchmark_data()
     df_table = pd.DataFrame(bench_data)
 
-    # Formatação visual
     df_table["Preço"] = df_table["Preço"].apply(lambda x: f"R$ {x:,.2f}")
     df_table["Volume"] = df_table["Volume"].apply(lambda x: f"{x:,.0f} un.")
     df_table["Faturamento"] = df_table["Faturamento"].apply(lambda x: f"R$ {x:,.2f}")
