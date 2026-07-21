@@ -1,0 +1,78 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <list>
+          <option value="altair" />
+          <option value="annotated-types" />
+          <option value="anyio" />
+          <option value="attrs" />
+          <option value="bcrypt" />
+          <option value="blinker" />
+          <option value="cachetools" />
+          <option value="certifi" />
+          <option value="charset-normalizer" />
+          <option value="click" />
+          <option value="colorama" />
+          <option value="deprecation" />
+          <option value="gitdb" />
+          <option value="GitPython" />
+          <option value="greenlet" />
+          <option value="h11" />
+          <option value="h2" />
+          <option value="hpack" />
+          <option value="httpcore" />
+          <option value="httpx" />
+          <option value="hyperframe" />
+          <option value="idna" />
+          <option value="Jinja2" />
+          <option value="jsonschema" />
+          <option value="jsonschema-specifications" />
+          <option value="MarkupSafe" />
+          <option value="multidict" />
+          <option value="narwhals" />
+          <option value="numpy" />
+          <option value="packaging" />
+          <option value="pandas" />
+          <option value="pillow" />
+          <option value="postgrest" />
+          <option value="propcache" />
+          <option value="protobuf" />
+          <option value="plotly" />
+          <option value="psycopg2-binary" />
+          <option value="pyarrow" />
+          <option value="pydantic" />
+          <option value="pydantic_core" />
+          <option value="pydeck" />
+          <option value="python-dateutil" />
+          <option value="python-dotenv" />
+          <option value="pytz" />
+          <option value="referencing" />
+          <option value="requests" />
+          <option value="rpds-py" />
+          <option value="six" />
+          <option value="smmap" />
+          <option value="SQLAlchemy" />
+          <option value="streamlit" />
+          <option value="tenacity" />
+          <option value="toml" />
+          <option value="tornado" />
+          <option value="typing-inspection" />
+          <option value="typing_extensions" />
+          <option value="tzdata" />
+          <option value="urllib3" />
+          <option value="watchdog" />
+          <option value="yarl" />
+        </list>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyPep8NamingInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="ignoredErrors">
+        <list>
+          <option value="N806" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
