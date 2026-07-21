@@ -1,0 +1,267 @@
+/* ==========================================================================
+   CLARIÔ INTELLIGENCE — DESIGN SYSTEM OFICIAL
+   ========================================================================== */
+
+:root {
+  /* Cores Base Clariô */
+  --clario-bg: #F8FAFC;
+  --clario-card-bg: #FFFFFF;
+  --clario-sidebar-bg: #FFFFFF;
+  --clario-border: #F1F5F9;
+  --clario-border-hover: #E2E8F0;
+
+  /* Accent Colors Clariô */
+  --clario-orange: #FF6B35;
+  --clario-orange-hover: #EA580C;
+  --clario-orange-bg: #FFF7ED;
+  --clario-dark: #0F172A;
+  --clario-dark-hover: #1E293B;
+
+  /* Indicadores Financeiros */
+  --clario-green: #10B981;
+  --clario-green-bg: #ECFDF5;
+  --clario-red: #EF4444;
+  --clario-blue: #0284C7;
+
+  /* Tipografia */
+  --clario-text-dark: #0F172A;
+  --clario-text-muted: #64748B;
+  --clario-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+
+  /* Sombras e Raios */
+  --clario-radius: 16px;
+  --clario-radius-sm: 10px;
+  --clario-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
+}
+
+body {
+  background-color: var(--clario-bg) !important;
+  color: var(--clario-text-dark) !important;
+  font-family: var(--clario-font) !important;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* SIDEBAR LATERAL CLARIÔ */
+.clario-sidebar {
+  width: 260px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: var(--clario-sidebar-bg);
+  border-right: 1px solid var(--clario-border);
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  z-index: 100;
+}
+
+.clario-logo-container {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  text-decoration: none;
+  margin-bottom: 32px;
+}
+
+.clario-logo-text {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--clario-dark);
+  letter-spacing: -0.8px;
+}
+
+.clario-logo-accent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--clario-orange);
+  color: #FFFFFF;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.clario-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--clario-radius-sm);
+  color: var(--clario-text-muted);
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+
+.clario-menu-item:hover {
+  background-color: var(--clario-bg);
+  color: var(--clario-dark);
+}
+
+.clario-menu-item.active {
+  background-color: var(--clario-orange-bg);
+  color: var(--clario-orange-hover);
+}
+
+.clario-user-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--clario-border);
+}
+
+.clario-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #FFEDD5;
+  color: #C2410C;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+/* ÁREA DE CONTEÚDO PRINCIPAL */
+.clario-main-content {
+  margin-left: 260px;
+  padding: 32px 40px;
+}
+
+/* CARDS NO ESTILO CLARIÔ */
+.clario-card {
+  background: var(--clario-card-bg);
+  border: 1px solid var(--clario-border);
+  border-radius: var(--clario-radius);
+  padding: 24px;
+  box-shadow: var(--clario-shadow);
+  transition: all 0.2s ease;
+}
+
+.clario-card:hover {
+  border-color: var(--clario-border-hover);
+}
+
+/* CARDS DE KPIS */
+.clario-kpi-card {
+  border-top: 4px solid var(--clario-dark);
+}
+
+.clario-kpi-card.kpi-green {
+  border-top-color: var(--clario-green);
+}
+
+.clario-kpi-card.kpi-orange {
+  border-top-color: var(--clario-orange);
+}
+
+.clario-kpi-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--clario-text-muted);
+}
+
+.clario-kpi-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--clario-dark);
+  letter-spacing: -0.5px;
+  margin: 6px 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* BOTÕES ESTILO CLARIÔ */
+.btn-clario-dark {
+  background-color: var(--clario-dark) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: var(--clario-radius-sm) !important;
+  font-weight: 600 !important;
+  padding: 10px 20px !important;
+  font-size: 14px !important;
+  transition: all 0.15s ease !important;
+}
+
+.btn-clario-dark:hover {
+  background-color: var(--clario-dark-hover) !important;
+  transform: translateY(-1px);
+}
+
+.btn-clario-light {
+  background-color: #FFFFFF !important;
+  color: var(--clario-dark) !important;
+  border: 1px solid var(--clario-border) !important;
+  border-radius: var(--clario-radius-sm) !important;
+  font-weight: 600 !important;
+  padding: 10px 18px !important;
+  font-size: 14px !important;
+}
+
+.btn-clario-light:hover {
+  background-color: var(--clario-bg) !important;
+}
+
+/* TABELAS */
+.clario-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--clario-border);
+  border-radius: var(--clario-radius-sm);
+  overflow: hidden;
+}
+
+.clario-table th {
+  background-color: #F8FAFC;
+  color: var(--clario-text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--clario-border);
+}
+
+.clario-table td {
+  padding: 14px 18px;
+  font-size: 13.5px;
+  color: var(--clario-text-dark);
+  border-bottom: 1px solid var(--clario-border);
+  background-color: #FFFFFF;
+}
+
+.clario-table tr.highlight-row td {
+  background-color: var(--clario-green-bg) !important;
+  color: #065F46 !important;
+  font-weight: 700 !important;
+}
+
+/* INPUTS */
+.clario-input {
+  width: 100%;
+  height: 42px;
+  border: 1px solid var(--clario-border);
+  border-radius: var(--clario-radius-sm);
+  padding: 0 14px;
+  font-weight: 600;
+  color: var(--clario-text-dark);
+  outline: none;
+}
+
+.clario-input:focus {
+  border-color: var(--clario-orange);
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
+}
